@@ -76,17 +76,14 @@ fn update(_app: &App, model: &mut Model, _update: Update) {
 fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
 	draw.background().color(BLACK);
-    
     for dot in &model.dots
 	{
 		dot.draw_dot(& draw);	
     }
-	
 	for circle in &model.circles
 	{
         circle.draw_circle(& draw);
 	}
-	
 	for star in &model.stars
 	{
 		star.draw_star(& draw);
