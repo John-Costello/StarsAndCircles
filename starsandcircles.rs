@@ -8,7 +8,7 @@ use nannou::prelude::*;
 extern crate arrayref;
 
 const NUM_OF_DOT: usize = 100;
-const NUM_OF_CIRCLE: usize = 5;
+const NUM_OF_CIRCLE: usize =5;
 const NUM_OF_STAR: usize = 10;
 const WIDTH:u32=800;
 const HEIGHT:u32=800;
@@ -79,60 +79,17 @@ fn view(app: &App, model: &Model, frame: Frame) {
     
     for dot in &model.dots
 	{
-		// https://docs.rs/nannou/latest/nannou/draw/primitive/ellipse/struct.Ellipse.html
-		draw.ellipse()
-            .xy( Vec2::new(dot.x, dot.y) )          
-			.radius(dot.r)           
-			//.no_fill()
-			.color(WHITE)
-            .stroke_weight(1.0)
-            .stroke(WHITE);	
+		dot.draw_dot(& draw);	
     }
 	
 	for circle in &model.circles
 	{
-		draw.ellipse()
-		.xy( Vec2::new(circle.x, circle.y) )
-		.radius(circle.r)
-		.no_fill()
-		.stroke_weight(circle.sw)
-		.stroke(rgb( (unsafe{COLOUR_ARRAY[circle.col][0]} as f32)/255.,(unsafe{COLOUR_ARRAY[circle.col][1]} as f32)/255.,(unsafe{COLOUR_ARRAY[circle.col][2]} as f32)/255.));
+        circle.draw_circle(& draw);
 	}
 	
 	for star in &model.stars
 	{
-		if(star.n==5)
-		{
-		draw.path()
-		    .stroke()
-			.weight(star.sw)			
-			.color( rgb( (unsafe{COLOUR_ARRAY[star.col][0]} as f32)/255.,(unsafe{COLOUR_ARRAY[star.col][1]} as f32)/255.,(unsafe{COLOUR_ARRAY[star.col][2]} as f32)/255.) )
-            .caps_round()
-            .join_round()
-			.points_closed(array_ref!(star.points, 0, 10).clone());
-		}
-        else if(star.n==6)
-		{
-		draw.path()
-		    .stroke()
-			.weight(star.sw)			
-			.color( rgb( (unsafe{COLOUR_ARRAY[star.col][0]} as f32)/255.,(unsafe{COLOUR_ARRAY[star.col][1]} as f32)/255.,(unsafe{COLOUR_ARRAY[star.col][2]} as f32)/255.) )
-            .caps_round()
-            .join_round()
-			.points_closed(array_ref!(star.points, 0, 12).clone());
-		}
-		else if(star.n==7)
-		{
-		draw.path()
-		    .stroke()
-			.weight(star.sw)			
-			.color( rgb( (unsafe{COLOUR_ARRAY[star.col][0]} as f32)/255.,(unsafe{COLOUR_ARRAY[star.col][1]} as f32)/255.,(unsafe{COLOUR_ARRAY[star.col][2]} as f32)/255.) )
-            .caps_round()
-            .join_round()
-			.points_closed(star.points);
-		}
-		
-        		
+		star.draw_star(& draw);
 	}
 	draw.to_frame(app, &frame).unwrap();
 }
@@ -228,6 +185,17 @@ impl Dot {
 			self.sp=1.0*(1.+rand::thread_rng().gen_range(0.0..1.0));
 		}
 	}
+	
+	fn draw_dot(& self, draw:& nannou::Draw) {
+		// https://docs.rs/nannou/latest/nannou/draw/primitive/ellipse/struct.Ellipse.html
+		draw.ellipse()
+            .xy( Vec2::new(self.x, self.y) )          
+			.radius(self.r)           
+			//.no_fill()
+			.color(WHITE)
+            .stroke_weight(1.0)
+            .stroke(WHITE);	
+	}
 }
 //=======================================================================
 
@@ -281,14 +249,24 @@ impl Circle {
 		}
 		if(self.direction_forward==true)
 		{
-			self.col+=1;
+			if(self.col<4095){   self.col+=1;   }
+			else if(self.col>4095){   self.col=4095;   }
 			if(self.col==4095){   self.direction_forward=false;   }
 		}
 		else if(self.direction_forward==false)
 		{
-			self.col-=1;
+			if(self.col>0){   self.col-=1;   }
 			if(self.col==0){   self.direction_forward=true;   }
 		}
+	}
+	
+	fn draw_circle(& self, draw:& nannou::Draw) {
+	    draw.ellipse()
+		.xy( Vec2::new(self.x, self.y) )
+		.radius(self.r)
+		.no_fill()
+		.stroke_weight(self.sw)
+		.stroke(rgb( (unsafe{COLOUR_ARRAY[self.col][0]} as f32)/255.,(unsafe{COLOUR_ARRAY[self.col][1]} as f32)/255.,(unsafe{COLOUR_ARRAY[self.col][2]} as f32)/255.));
 	}
 }
 //=======================================================================
@@ -370,12 +348,13 @@ impl Star {
 		}
 		if(self.direction_forward==true)
 		{
-			self.col+=1;
+			if(self.col<4095){   self.col+=1;   }
+			else if(self.col>4095){   self.col=4095;   }
 			if(self.col==4095){   self.direction_forward=false;   }
 		}
 		else if(self.direction_forward==false)
 		{
-			self.col-=1;
+			if(self.col>0){   self.col-=1;   }
 			if(self.col==0){   self.direction_forward=true;   }
 		}
 		
@@ -402,6 +381,39 @@ impl Star {
 							     pt2(x+ra*(rot+12.*PI/nf).cos(), y+ra*(rot+12.*PI/nf).sin()),
 		                         pt2(x+rb*(rot+13.*PI/nf).cos(), y+rb*(rot+13.*PI/nf).sin())		 
 								 ];
+	}
+	
+	fn draw_star(& self, draw:& nannou::Draw) {
+		if(self.n==5)
+		{
+		draw.path()
+		    .stroke()
+			.weight(self.sw)			
+			.color( rgb( (unsafe{COLOUR_ARRAY[self.col][0]} as f32)/255.,(unsafe{COLOUR_ARRAY[self.col][1]} as f32)/255.,(unsafe{COLOUR_ARRAY[self.col][2]} as f32)/255.) )
+            .caps_round()
+            .join_round()
+			.points_closed(array_ref!(self.points, 0, 10).clone());
+		}
+        else if(self.n==6)
+		{
+		draw.path()
+		    .stroke()
+			.weight(self.sw)			
+			.color( rgb( (unsafe{COLOUR_ARRAY[self.col][0]} as f32)/255.,(unsafe{COLOUR_ARRAY[self.col][1]} as f32)/255.,(unsafe{COLOUR_ARRAY[self.col][2]} as f32)/255.) )
+            .caps_round()
+            .join_round()
+			.points_closed(array_ref!(self.points, 0, 12).clone());
+		}
+		else if(self.n==7)
+		{
+		draw.path()
+		    .stroke()
+			.weight(self.sw)			
+			.color( rgb( (unsafe{COLOUR_ARRAY[self.col][0]} as f32)/255.,(unsafe{COLOUR_ARRAY[self.col][1]} as f32)/255.,(unsafe{COLOUR_ARRAY[self.col][2]} as f32)/255.) )
+            .caps_round()
+            .join_round()
+			.points_closed(self.points);
+		}
 	}
 }
 
