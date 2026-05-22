@@ -69,12 +69,13 @@ abstract class Shape implements ShapeInterface
       stroke(colourArray[col][0],colourArray[col][1],colourArray[col][2]);
       if(directionForward==true)
       {
-         col++;
+         if(col<4095){col++;}
+         else if(col>4095){col=4095;}
          if(col==4095){directionForward=false;};
       }
       else if(directionForward==false)
       {
-         col--;
+         if(col>0){col--;}
          if(col==0){directionForward=true;};
       } 
       
@@ -140,18 +141,17 @@ interface ShapeInterface
 
 //=========================================================================
 class Dot{
-   private float x0=width/2;
-   private float y0=height/2;
-   private float x=x0;
-   private float y=y0;
-   private float a=random(1)*TWO_PI;
-   private float len=(sqrt((x+10)*(x+10)+(y+10)*(y+10)))*(1+random(1));
-   private float dist=len*random(1);
-   private float f=dist/len;
-   private float sp=1*(1+random(1));  
-   private float t=dist/sp;    
-   private int sw;
-   
+   private float x0=width/2;          // x0 start point of travel-paths.
+   private float y0=height/2;         // y0 start point of travel-paths.
+   private float a=random(1)*TWO_PI;  // angle of travel-path from center.
+   private float len=(sqrt((x0+10)*(x0+10)+(y0+10)*(y0+10)))*(1+random(1));  // overall length of travel-path.
+   private float dist=len*random(1);  // distance value into travel-path, initial distance.
+   private float sp=1*(1+random(1));  // speed value, number between 1 and 2, pixels travel per frame.
+   private float t=dist/sp;           // time value, initial time value determined from initial distance divided by speed.
+   private float x;                   // x value point on travel-path.
+   private float y;                   // x value point on travel-path.
+   private float f;                   // f is faction of travel-path traveled to determine sw strokeWeight value.
+   private int sw;                    // strokeWeight value.
    
    void drawDot()
    {
@@ -169,7 +169,7 @@ class Dot{
          t=0;
          x=x0;
          y=y0;
-         len=(sqrt((x+10)*(x+10)+(y+10)*(y+10)))*(1+random(1));
+         len=(sqrt((x0+10)*(x0+10)+(y0+10)*(y0+10)))*(1+random(1));
          a=random(1)*TWO_PI;
          sp=1*(1+random(1));
       }       
