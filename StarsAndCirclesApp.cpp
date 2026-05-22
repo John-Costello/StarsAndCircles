@@ -108,15 +108,15 @@ public:
         gl::color(colourArray[col][0]/255., colourArray[col][1]/255., colourArray[col][2]/255.);
         if (directionForward == true)
         {
-            col++;
+            if (col < 4095) { col++; }
+            else if (col > 4095) { col = 4095; }
             if (col == 4095) { directionForward = false; };
         }
         else if (directionForward == false)
         {
-            col--;
+            if (col > 0) { col--; }
             if (col == 0) { directionForward = true; };
         }
-
         drawShapeSub();
     }
 };
